@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - Rerezz</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #6a11cb;
+            --primary-light: rgba(106, 17, 203, 0.1);
+            --secondary-color: #2575fc;
+            --text-color: #2d3436;
+            --light-text: #636e72;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --sidebar-bg: linear-gradient(135deg, #6a11cb, #2575fc);
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            --footer-bg: #2d3436;
+            --footer-text: #f5f7fa;
+            --header-bg: rgba(255, 255, 255, 0.95);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            color: var(--text-color);
+            background-color: #f5f7fa;
+            position: relative;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        #canvas-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.3;
+        }
+
+        /* Mobile Header */
+        .mobile-header {
+            display: none;
+            background: var(--header-bg);
+            padding: 1rem;
+            box-shadow: var(--shadow);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 100;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .mobile-header .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--primary-color);
+        }
+
+        .mobile-header .menu-toggle {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        .dashboard-container {
+            display: flex;
+            flex: 1;
+            margin-top: 0;
+        }
+
+        /* ===== Sidebar ===== */
+        .sidebar {
+            width: 280px;
+            background: var(--sidebar-bg);
+            color: white;
+            padding: 1.5rem 0;
+            transition: var(--transition);
+            position: relative;
+            z-index: 50;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+        }
+
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 40;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+        }
+
+        .sidebar-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .sidebar-header {
+            padding: 0 1.5rem 1.5rem;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .sidebar-header h2 i {
+            font-size: 1.2rem;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 0.5rem 0;
+            height: calc(100vh - 100px);
+            overflow-y: auto;
+        }
+
+        .sidebar-menu::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .sidebar-menu::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+        }
+
+        .sidebar-menu li a {
+            display: flex;
+            align-items: center;
+            padding: 0.9rem 1.5rem;
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            border-radius: 0;
+            margin: 0.25rem 1rem;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .sidebar-menu li a:hover, .sidebar-menu li a.active {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateX(5px);
+            border-radius: 0 50px 50px 0;
+        }
+
+        .sidebar-menu li a.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 3px;
+            background: white;
+        }
+
+        .sidebar-menu i {
+            margin-right: 0.75rem;
+            width: 20px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        /* Submenu styles */
+        .has-submenu > a {
+            position: relative;
+        }
+
+        .has-submenu > a::after {
+            content: '\f078';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            right: 1.5rem;
+            transition: var(--transition);
+        }
+
+        .has-submenu.active > a::after {
+            transform: rotate(180deg);
+        }
+
+        .submenu {
+            list-style: none;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            padding-left: 1.5rem;
+        }
+
+        .has-submenu.active .submenu {
+            max-height: 500px;
+        }
+
+        .submenu li a {
+            padding: 0.7rem 1.5rem;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .submenu li a i {
+            font-size: 0.9rem;
+        }
+
+        /* ===== Main Content ===== */
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+            min-height: 100vh;
+            margin-left: 280px;
+            transition: var(--transition);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .header h1 {
+            color: var(--primary-color);
+            font-size: 1.8rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .header h1 i {
+            color: var(--secondary-color);
+        }
+
+        .logout-btn {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 0.5rem 1.25rem;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        .logout-btn:hover {
+            background-color: #bb2d3b;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+        }
+
+        /* ===== Profile Section ===== */
+        .profile-section {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .profile-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .info-item {
+            margin-bottom: 1.25rem;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: var(--light-text);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .info-value {
+            padding: 0.75rem;
+            background-color: var(--primary-light);
+            border-radius: 8px;
+            word-break: break-all;
+            position: relative;
+        }
+
+        .api-key-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .copy-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.35rem 0.75rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-left: 0.75rem;
+        }
+
+        .copy-btn:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .copy-btn i {
+            margin-right: 0.25rem;
+        }
+
+        /* ===== Footer ===== */
+        footer {
+            background: var(--footer-bg);
+            color: var(--footer-text);
+            padding: 3rem 2rem 1.5rem;
+            margin-top: auto;
+            margin-left: 280px;
+            transition: var(--transition);
+        }
+
+        /* [Previous footer styles remain the same...] */
+
+        /* Responsive Styles */
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+                z-index: 100;
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            footer {
+                margin-left: 0;
+            }
+
+            .mobile-header {
+                display: flex;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .footer-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .footer-about, .footer-links, .footer-contact, .footer-newsletter {
+                margin-bottom: 2rem;
+            }
+
+            .main-content {
+                padding: 1.5rem;
+                padding-top: 5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .profile-info {
+                grid-template-columns: 1fr;
+            }
+            
+            .profile-section {
+                padding: 1.25rem;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .copied-message {
+            position: absolute;
+            top: -25px;
+            right: 0;
+            background: var(--primary-color);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .copied-message.show {
+            opacity: 1;
+        }
+
+        /* ===== Footer ===== */
+        footer {
+            background: var(--footer-bg);
+            color: var(--footer-text);
+            padding: 3rem 2rem 1.5rem;
+            margin-top: auto;
+        }
+
+        .footer-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .footer-logo i {
+            font-size: 1.8rem;
+            color: var(--secondary-color);
+        }
+
+        .footer-logo h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .footer-about p {
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+            opacity: 0.8;
+        }
+
+        .footer-social {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .footer-social a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            color: white;
+            transition: var(--transition);
+        }
+
+        .footer-social a:hover {
+            background: var(--primary-color);
+            transform: translateY(-3px);
+        }
+
+        .footer-links h3, .footer-contact h3, .footer-newsletter h3 {
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+            padding-bottom: 0.75rem;
+        }
+
+        .footer-links h3::after, .footer-contact h3::after, .footer-newsletter h3::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 50px;
+            height: 2px;
+            background: var(--primary-color);
+        }
+
+        .footer-links ul {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 0.75rem;
+        }
+
+        .footer-links a {
+            color: var(--footer-text);
+            text-decoration: none;
+            opacity: 0.8;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .footer-links a:hover {
+            opacity: 1;
+            color: var(--secondary-color);
+            transform: translateX(5px);
+        }
+
+        .footer-links i {
+            font-size: 0.8rem;
+        }
+
+        .footer-contact p {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            opacity: 0.8;
+        }
+
+        .footer-contact i {
+            width: 20px;
+            text-align: center;
+            color: var(--secondary-color);
+        }
+
+        .footer-newsletter p {
+            margin-bottom: 1.5rem;
+            opacity: 0.8;
+            line-height: 1.6;
+        }
+
+        .newsletter-form {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .newsletter-form input {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: none;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        .newsletter-form input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .newsletter-form input:focus {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .newsletter-form button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .newsletter-form button:hover {
+            background: var(--secondary-color);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 2rem;
+            margin-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            opacity: 0.7;
+            font-size: 0.9rem;
+        }
+
+        /* Responsive Footer */
+        @media (max-width: 768px) {
+            .footer-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .footer-about, .footer-links, .footer-contact, .footer-newsletter {
+                margin-bottom: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Canvas Background Animation -->
+    <canvas id="canvas-bg"></canvas>
+
+    <!-- Mobile Header -->
+    <div class="mobile-header">
+        <div class="logo">
+            <i class="fas fa-rocket"></i>
+            <span>Rerezz.xyz</span>
+        </div>
+        <button class="menu-toggle" id="menuToggle">
+            <i class="fas fa-bars"></i>
+        </button>
+    </div>
+
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-rocket"></i> <span>Rerezz.xyz</span></h2>
+            </div>
+            <ul class="sidebar-menu">
+                <li class="has-submenu active">
+                    <a href="#"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a>
+                    <ul class="submenu" style="max-height: 500px;">
+                        <li><a href="/dashboard"><i class="fas fa-home"></i> <span>Home</span></a></li>
+                        <li><a href="https://whatsapp.com/channel/0029Vat4lwpKLaHoS0MAwj3Z"><i class="fab fa-whatsapp"></i> <span>WhatsApp Support</span></a></li>
+                        <li><a href="https://www.youtube.com/@Rerezz-Official"><i class="fab fa-youtube"></i> <span>YouTube Support</span></a></li>
+                    </ul>
+                </li>
+                <li class="has-submenu">
+                    <a href="#"><i class="fas fa-robot"></i> <span>Open AI</span></a>
+                    <ul class="submenu">
+                        <li><a href="/profile"><i class="fas fa-arrow-right"></i> <span>Profile</span></a></li>
+                        <li><a href="#"><i class="fas fa-arrow-right"></i> <span>API Keys</span></a></li>
+                        <li><a href="#"><i class="fas fa-arrow-right"></i> <span>Activity Log</span></a></li>
+                    </ul>
+                </li>
+                <li class="has-submenu">
+                    <a href="#"><i class="fas fa-download"></i> <span>Downloader</span></a>
+                    <ul class="submenu">
+                        <li><a href="/profile"><i class="fas fa-arrow-right"></i> <span>Profile</span></a></li>
+                        <li><a href="#"><i class="fas fa-arrow-right"></i> <span>API Keys</span></a></li>
+                        <li><a href="#"><i class="fas fa-arrow-right"></i> <span>Activity Log</span></a></li>
+                    </ul>
+                </li>
+                <li class="has-submenu">
+                    <a href="#"><i class="fas fa-search"></i><span>Search</span></a>
+                    <ul class="submenu">
+                        <li><a href="/api/search/pinterest?query=elaina&limit=10&apikey="><i class="fas fa-arrow-right"></i> <span>Pinterest</span></a></li>
+                    </ul>
+                </li>
+                <li class="has-submenu">
+                    <a href="#"><i class="fas fa-star-and-crescent"></i> <span>Islami</span></a>
+                    <ul class="submenu">
+                        <li><a href="/api/islami/jadwal-sholat?kota=sukabumi&apikey="><i class="fas fa-arrow-right"></i> <span>Jadwal Sholat</span></a></li>
+                    </ul>
+                </li>
+                <li class="has-submenu">
+                    <a href="#"><i class="fas fa-solid fa-masks-theater"></i> <span>Anime</span></a>
+                    <ul class="submenu">
+                        <li><a href="/api/anime/akiyama&apikey="><i class="fas fa-arrow-right"></i> <span>Akiyama</span></a></li>
+                        <li><a href="/api/anime/ana&apikey="><i class="fas fa-arrow-right"></i> <span>Ana</span></a></li>
+                        <li><a href="/api/anime/asuna&apikey="><i class="fas fa-arrow-right"></i> <span>Asuna</span></a></li>
+                        <li><a href="/api/anime/ayujawa&apikey="><i class="fas fa-arrow-right"></i> <span>Ayujawa</span></a></li>
+                        <li><a href="/api/anime/boruto&apikey="><i class="fas fa-arrow-right"></i> <span>Boruto</span></a></li>
+                        <li><a href="/api/anime/chitanda&apikey="><i class="fas fa-arrow-right"></i> <span>Chitanda</span></a></li>
+                        <li><a href="/api/anime/elaina&apikey="><i class="fas fa-arrow-right"></i> <span>Elaina</span></a></li>
+                        <li><a href="/api/anime/kurumi&apikey="><i class="fas fa-arrow-right"></i> <span>Kurumi</span></a></li>
+                    </ul>
+                </li>
+
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="header">
+                <h1><i class="fas fa-user-circle"></i> Profile Information</h1>
+                <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            </div>
+
+            <div class="profile-section">
+                <div class="profile-info">
+                    <div class="info-item">
+                        <div class="info-label"><i class="fas fa-user"></i> Username</div>
+                        <div class="info-value" id="username">Loading...</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label"><i class="fas fa-envelope"></i> Email</div>
+                        <div class="info-value" id="email">Loading...</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label"><i class="fas fa-key"></i> API Key</div>
+                        <div class="info-value" id="apikey-container">
+                            <div class="api-key-container">
+                                <span id="apikey">Loading...</span>
+                                <button class="copy-btn" id="copyBtn">
+                                    <i class="fas fa-copy"></i> Copy
+                                </button>
+                            </div>
+                            <div class="copied-message" id="copiedMessage">Copied!</div>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label"><i class="fas fa-database"></i> API Quota</div>
+                        <div class="info-value" id="quota">Loading...</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label"><i class="fas fa-calendar-alt"></i> Member Since</div>
+                        <div class="info-value" id="created_at">Loading...</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-container">
+            <div class="footer-about">
+                <div class="footer-logo">
+                    <i class="fas fa-rocket"></i>
+                    <h2>Rerezz.xyz</h2>
+                </div>
+                <p>We provide powerful tools and services to help developers build amazing applications with our API platform.</p>
+                <div class="footer-social">
+                    <a href="#" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" title="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="#" title="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="#" title="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#" title="YouTube"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+            
+            <div class="footer-links">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Home</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> About Us</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Services</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Documentation</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Pricing</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-contact">
+                <h3>Contact Us</h3>
+                <p><i class="fas fa-map-marker-alt"></i> Indonesia, Jawa Barat</p>
+                <p><i class="fas fa-envelope"></i> suport.rerezz@gmail.com</p>
+                <p><i class="fas fa-phone-alt"></i> +62 852-1695-5233</p>
+                <p><i class="fas fa-clock"></i> Mon-Fri: 9AM - 6PM</p>
+            </div>
+            
+            <div class="footer-newsletter">
+                <h3>Newsletter</h3>
+                <p>Subscribe to our newsletter to receive updates and exclusive offers.</p>
+                <form class="newsletter-form">
+                    <input type="email" placeholder="Your email address" required>
+                    <button type="submit"><i class="fas fa-paper-plane"></i></button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>&copy; 2023 Rerezz.xyz. All Rights Reserved. | Designed with <i class="fas fa-heart" style="color: #ff4757;"></i> BY Rerezz Team</p>
+        </div>
+    </footer>
+
+    <script>
+        const canvas = document.getElementById('canvas-bg');
+        const ctx = canvas.getContext('2d');
+        
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        
+        resizeCanvas();
+        
+        class Particle {
+            constructor() {
+                this.reset();
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 4 + 1;
+                this.baseSize = this.size;
+                this.speedX = Math.random() * 2 - 1;
+                this.speedY = Math.random() * 2 - 1;
+                this.colorAngle = Math.random() * 360;
+                this.colorSpeed = Math.random() * 2 - 1;
+            }
+            
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 4 + 1;
+                this.baseSize = this.size;
+            }
+            
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                this.colorAngle += this.colorSpeed;
+                
+                this.size = this.baseSize + Math.sin(Date.now() * 0.001 + this.x * 0.01) * 1;
+                
+                if (this.x > canvas.width + 50) this.x = -50;
+                if (this.x < -50) this.x = canvas.width + 50;
+                if (this.y > canvas.height + 50) this.y = -50;
+                if (this.y < -50) this.y = canvas.height + 50;
+            }
+            
+            draw() {
+                const hue = (this.colorAngle % 360 + 360) % 360;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = `hsla(${hue}, 80%, 60%, 0.5)`;
+                ctx.fill();
+                
+                const gradient = ctx.createRadialGradient(
+                    this.x, this.y, 0,
+                    this.x, this.y, this.size * 2
+                );
+                gradient.addColorStop(0, `hsla(${hue}, 80%, 60%, 0.3)`);
+                gradient.addColorStop(1, `hsla(${hue}, 80%, 60%, 0)`);
+                
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size * 2, 0, Math.PI * 2);
+                ctx.fillStyle = gradient;
+                ctx.fill();
+            }
+        }
+        
+        const particles = [];
+        const particleCount = Math.floor(window.innerWidth / 5);
+        
+        for (let i = 0; i < particleCount; i++) {
+            particles.push(new Particle());
+        }
+        
+        function animate() {
+            ctx.fillStyle = 'rgba(245, 247, 250, 0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+                particles[i].draw();
+            }
+            
+            requestAnimationFrame(animate);
+        }
+        
+        animate();
+        
+        window.addEventListener('resize', function() {
+            resizeCanvas();
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuToggle = document.getElementById('menuToggle');
+            const sidebar = document.getElementById('sidebar');
+            const sidebarOverlay = document.getElementById('sidebarOverlay');
+            
+            menuToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('active');
+                sidebarOverlay.classList.toggle('active');
+                document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : 'auto';
+            });
+            
+            sidebarOverlay.addEventListener('click', function() {
+                sidebar.classList.remove('active');
+                sidebarOverlay.classList.remove('active');
+                document.body.style.overflow = 'auto';
+            });
+            
+            const submenuToggles = document.querySelectorAll('.has-submenu > a');
+            
+            submenuToggles.forEach(toggle => {
+                toggle.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const parent = this.parentElement;
+                    const wasActive = parent.classList.contains('active');
+                    
+                    document.querySelectorAll('.has-submenu').forEach(item => {
+                        if (item !== parent) {
+                            item.classList.remove('active');
+                            item.querySelector('.submenu').style.maxHeight = '0';
+                        }
+                    });
+                    
+                    if (!wasActive) {
+                        parent.classList.add('active');
+                        const submenu = parent.querySelector('.submenu');
+                        submenu.style.maxHeight = submenu.scrollHeight + 'px';
+                    } else {
+                        parent.classList.remove('active');
+                        parent.querySelector('.submenu').style.maxHeight = '0';
+                    }
+                });
+            });
+            
+            const dashboardSubmenu = document.querySelector('.has-submenu.active .submenu');
+            if (dashboardSubmenu) {
+                dashboardSubmenu.style.maxHeight = dashboardSubmenu.scrollHeight + 'px';
+            }
+
+            const newsletterForm = document.querySelector('.newsletter-form');
+            if (newsletterForm) {
+                newsletterForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const emailInput = this.querySelector('input[type="email"]');
+                    const email = emailInput.value;
+                    
+                    console.log('Subscribed email:', email);
+                    
+                    alert('Thank you for subscribing to our newsletter!');
+                    emailInput.value = '';
+                });
+            }
+        });
+
+        async function fetchProfileData() {
+            try {
+                const response = await fetch('/api/profile');
+                const data = await response.json();
+        
+                if (data.success) {
+                    document.getElementById('username').textContent = data.user.username || 'Not set';
+                    document.getElementById('email').textContent = data.user.email || 'Not set';
+                    document.getElementById('apikey').textContent = data.user.apikey || 'No API key generated';
+                    document.getElementById('quota').textContent = data.user.quota ? `${data.user.quota} requests` : 'Unlimited';
+        
+                    if (data.user.created_at) {
+                        const regDate = new Date(data.user.created_at);
+                        document.getElementById('created_at').textContent =
+                            regDate.toLocaleDateString('en-US', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric'
+                            });
+                    } else {
+                        document.getElementById('created_at').textContent = 'Unknown';
+                    }
+        
+                    const apikey = data.user.apikey || '';
+                    if (apikey) {
+                        updateApiLinks(apikey);
+                    }
+                } else {
+                    window.location.href = '/auth/login';
+                }
+            } catch (error) {
+                console.error('Error fetching profile:', error);
+                window.location.href = '/auth/login';
+            }
+        }
+
+        document.getElementById('copyBtn').addEventListener('click', function() {
+            const apiKey = document.getElementById('apikey').textContent;
+            if (apiKey && apiKey !== 'Loading...' && apiKey !== 'No API key generated') {
+                navigator.clipboard.writeText(apiKey).then(() => {
+                    const copiedMsg = document.getElementById('copiedMessage');
+                    copiedMsg.classList.add('show');
+                    setTimeout(() => {
+                        copiedMsg.classList.remove('show');
+                    }, 2000);
+                });
+            }
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', async function() {
+            try {
+                const response = await fetch('/api/logout', {
+                    method: 'POST'
+                });
+                
+                if (response.ok) {
+                    window.location.href = '/auth/login';
+                } else {
+                    alert('Logout failed. Please try again.');
+                }
+            } catch (error) {
+                console.error('Logout error:', error);
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', fetchProfileData);
+
+        function updateApiLinks(apikey) {
+            const links = document.querySelectorAll('a[href*="apikey="]');
+
+            links.forEach(link => {
+                const originalHref = link.getAttribute('href');
+            
+                const updatedHref = originalHref.replace('apikey=', `apikey=${encodeURIComponent(apikey)}`);
+            
+                link.setAttribute('href', updatedHref);
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Rerezz.xyz</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        /* ===== Base Styles ===== */
+        :root {
+            --primary-color: #4a6bff;
+            --primary-hover: #3a5aff;
+            --text-color: #333;
+            --light-gray: #c4c4c4;
+            --error-color: #ff4757;
+            --white: #ffffffc9;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #c4c4c4;
+            background-size: cover;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* ===== Register Container ===== */
+        .register-container {
+            background: var(--white);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 400px;
+            padding: 2rem;
+            text-align: center;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .logo {
+            margin-bottom: 1.5rem;
+        }
+
+        .logo img {
+            width: 200px;
+            height: auto;
+        }
+
+        h2 {
+            color: var(--text-color);
+            margin-bottom: 0.5rem;
+            font-size: 1.5rem;
+        }
+
+        .subtitle {
+            color: var(--text-color);
+            opacity: 0.8;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+        }
+
+        /* ===== Form Elements ===== */
+        .form-group {
+            margin-bottom: 1.25rem;
+            text-align: left;
+            position: relative;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-color);
+            font-size: 0.9rem;
+        }
+
+        .input-with-icon {
+            position: relative;
+        }
+
+        .input-with-icon i:first-child {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-color);
+            opacity: 0.6;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 40px;
+            border: 1px solid var(--light-gray);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: var(--transition);
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(74, 107, 255, 0.2);
+        }
+
+        .error-message {
+            color: var(--error-color);
+            font-size: 0.8rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+
+        /* ===== Password Toggle ===== */
+        .toggle-password {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-color);
+            opacity: 0.6;
+            cursor: pointer;
+            transition: var(--transition);
+            z-index: 2;
+        }
+
+        .toggle-password:hover {
+            opacity: 1;
+        }
+
+        /* ===== Buttons ===== */
+        .register-button {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--primary-color);
+            color: var(--white);
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            position: relative;
+        }
+
+        .register-button:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(74, 107, 255, 0.3);
+        }
+
+        .register-button.loading {
+            pointer-events: none;
+            opacity: 0.8;
+        }
+
+        .register-button .spinner {
+            display: none;
+            animation: spin 1s linear infinite;
+        }
+
+        .register-button.loading .spinner {
+            display: inline-block;
+        }
+
+        .register-button.loading .button-text {
+            visibility: hidden;
+        }
+
+        /* ===== Message ===== */
+        .message {
+            margin-top: 1rem;
+            padding: 0.75rem;
+            border-radius: 8px;
+            display: none;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        .success {
+            background: rgba(40, 167, 69, 0.1);
+            color: #28a745;
+            border: 1px solid rgba(40, 167, 69, 0.2);
+        }
+
+        .error {
+            background: rgba(255, 77, 77, 0.1);
+            color: #ff4d4d;
+            border: 1px solid rgba(255, 77, 77, 0.2);
+        }
+
+        /* ===== Footer Links ===== */
+        .login-link {
+            color: var(--text-color);
+            font-size: 0.9rem;
+        }
+
+        .login-link a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .login-link a:hover {
+            color: var(--primary-hover);
+            text-decoration: underline;
+        }
+
+        /* ===== Animations ===== */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* ===== Responsive Design ===== */
+        @media (max-width: 480px) {
+            .register-container {
+                padding: 1.5rem;
+            }
+            
+            h2 {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <div class="logo">
+            <img src="https://files.catbox.moe/r1zfm3.png" alt="Logo">
+        </div>
+        
+        <h2>Create Your Account</h2>
+        <p class="subtitle">Join Rerezz.xyz to access all features</p>
+
+        <div id="message" class="message"></div>
+
+        <form id="registerForm">
+            <div class="form-group">
+                <label for="username">&nbsp;<i class="fa-solid fa-user"></i> Username</label>
+                <div class="input-with-icon">
+                    <i class="fas fa-user-circle"></i>
+                    <input type="text" id="username" placeholder="Enter your username" required>
+                </div>
+                <span class="error-message" id="usernameError">Please enter a username</span>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">&nbsp;<i class="fa-solid fa-envelope"></i> Email</label>
+                <div class="input-with-icon">
+                    <i class="fas fa-envelope"></i>
+                    <input type="email" id="email" placeholder="Enter your email" required>
+                </div>
+                <span class="error-message" id="emailError">Please enter a valid email</span>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">&nbsp;<i class="fa-solid fa-key"></i> Password</label>
+                <div class="input-with-icon">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="password" placeholder="Enter your password" required style="padding-right: 40px;">
+                    <i class="fas fa-eye toggle-password" id="togglePassword"></i>
+                </div>
+                <span class="error-message" id="passwordError">Please enter a password</span>
+            </div>
+            
+            <button type="submit" class="register-button" id="registerButton">
+                <span class="button-text"><i class="fas fa-user-plus"></i> Register</span>
+                <i class="fas fa-spinner spinner"></i>
+            </button>
+        </form>
+
+        <p class="login-link">Already have an account? <a href="/auth/login">Login here</a></p>
+    </div>
+
+    <script>
+        // Toggle Password Visibility
+        const togglePassword = document.getElementById('togglePassword');
+        const passwordField = document.getElementById('password');
+        
+        togglePassword.addEventListener('click', function() {
+            const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordField.setAttribute('type', type);
+            this.classList.toggle('fa-eye');
+            this.classList.toggle('fa-eye-slash');
+        });
+
+        // Form Validation and Submission
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const username = document.getElementById('username').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value.trim();
+            
+            const usernameError = document.getElementById('usernameError');
+            const emailError = document.getElementById('emailError');
+            const passwordError = document.getElementById('passwordError');
+            const messageEl = document.getElementById('message');
+            const registerButton = document.getElementById('registerButton');
+
+            // Reset error messages
+            usernameError.style.display = 'none';
+            emailError.style.display = 'none';
+            passwordError.style.display = 'none';
+            messageEl.style.display = 'none';
+            messageEl.textContent = '';
+
+            // Validate inputs
+            let isValid = true;
+            
+            if (!username) {
+                usernameError.style.display = 'block';
+                isValid = false;
+            }
+            
+            if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
+                emailError.style.display = 'block';
+                isValid = false;
+            }
+            
+            if (!password) {
+                passwordError.style.display = 'block';
+                isValid = false;
+            }
+
+            if (isValid) {
+                // Show loading state
+                registerButton.classList.add('loading');
+                
+                try {
+                    const response = await fetch('/api/register', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            username,
+                            email,
+                            password
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        messageEl.style.display = 'block';
+                        messageEl.className = 'message success';
+                        messageEl.textContent = 'Registration successful! Redirecting to login...';
+                        
+                        // Clear form
+                        document.getElementById('registerForm').reset();
+                        
+                        // Redirect to login page after 2 seconds
+                        setTimeout(() => {
+                            window.location.href = '/auth/login';
+                        }, 2000);
+                    } else {
+                        messageEl.style.display = 'block';
+                        messageEl.className = 'message error';
+                        messageEl.textContent = data.message || 'Registration failed. Please try again.';
+                    }
+                } catch (error) {
+                    messageEl.style.display = 'block';
+                    messageEl.className = 'message error';
+                    messageEl.textContent = 'An error occurred during registration. Please try again.';
+                } finally {
+                    // Hide loading state
+                    registerButton.classList.remove('loading');
+                }
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile | Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-light: #e6ebff;
+            --secondary: #3f37c9;
+            --dark: #212529;
+            --light: #f8f9fa;
+            --gray: #6c757d;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --border: #dee2e6;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: white;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .header h1 {
+            color: var(--primary);
+            font-size: 1.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .header i {
+            color: var(--secondary);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.6rem 1.25rem;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+            font-size: 0.95rem;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(67, 97, 238, 0.2);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--primary-light);
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #d1146f;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(247, 37, 133, 0.2);
+        }
+
+        /* Profile Section */
+        .profile-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+            border: 1px solid var(--border);
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .profile-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .info-item {
+            margin-bottom: 1.5rem;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: var(--gray);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .info-value {
+            padding: 0.75rem;
+            background-color: var(--primary-light);
+            border-radius: 8px;
+            word-break: break-all;
+            position: relative;
+        }
+
+        /* API Key Section */
+        .api-key-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .api-key-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 500px;
+            padding: 2rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            animation: modalFadeIn 0.3s ease-out;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--gray);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+            margin-top: 2rem;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Messages */
+        .alert {
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .alert-success {
+            background-color: rgba(76, 201, 240, 0.1);
+            color: #4cc9f0;
+            border: 1px solid rgba(76, 201, 240, 0.2);
+        }
+
+        .alert-danger {
+            background-color: rgba(247, 37, 133, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(247, 37, 133, 0.2);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1.5rem;
+            }
+            
+            .profile-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-user-circle"></i> Profile Information</h1>
+            <div class="button-group">
+                <a href="/dashboard" class="btn btn-outline">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+                <button class="btn btn-danger" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </div>
+
+        <!-- Success/Error Messages -->
+        <div class="alert alert-success" id="successAlert"></div>
+        <div class="alert alert-danger" id="errorAlert"></div>
+
+        <!-- Profile Card -->
+        <div class="profile-card">
+            <div class="profile-grid">
+                <div class="info-item">
+                    <div class="info-label">
+                        <i class="fas fa-user"></i> Username
+                    </div>
+                    <div class="info-value" id="username">Loading...</div>
+                </div>
+                
+                <div class="info-item">
+                    <div class="info-label">
+                        <i class="fas fa-envelope"></i> Email
+                    </div>
+                    <div class="info-value" id="email">Loading...</div>
+                </div>
+                
+                <div class="info-item">
+                    <div class="info-label">
+                        <i class="fas fa-key"></i> API Key
+                    </div>
+                    <div class="info-value">
+                        <div class="api-key-container">
+                            <span id="apikey">Loading...</span>
+                            <div class="api-key-actions">
+                                <button class="btn btn-outline" id="copyBtn">
+                                    <i class="fas fa-copy"></i> Copy
+                                </button>
+                                <button class="btn btn-primary" id="editBtn">
+                                    <i class="fas fa-edit"></i> Edit
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="info-item">
+                    <div class="info-label">
+                        <i class="fas fa-database"></i> API Quota
+                    </div>
+                    <div class="info-value" id="quota">Loading...</div>
+                </div>
+                
+                <div class="info-item">
+                    <div class="info-label">
+                        <i class="fas fa-calendar-alt"></i> Member Since
+                    </div>
+                    <div class="info-value" id="created_at">Loading...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit API Key Modal -->
+    <div class="modal" id="apiKeyModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">
+                    <i class="fas fa-key"></i> Update API Key
+                </h3>
+                <button class="close-btn" id="closeModal">&times;</button>
+            </div>
+            
+            <form id="apiKeyForm">
+                <div class="form-group">
+                    <label for="newApiKey" class="form-label">New API Key</label>
+                    <input type="text" id="newApiKey" class="form-control" required>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" id="cancelBtn">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary" id="saveBtn">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const logoutBtn = document.getElementById('logoutBtn');
+        const copyBtn = document.getElementById('copyBtn');
+        const editBtn = document.getElementById('editBtn');
+        const closeModal = document.getElementById('closeModal');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const apiKeyModal = document.getElementById('apiKeyModal');
+        const apiKeyForm = document.getElementById('apiKeyForm');
+        const saveBtn = document.getElementById('saveBtn');
+        const successAlert = document.getElementById('successAlert');
+        const errorAlert = document.getElementById('errorAlert');
+
+        // Show alert message
+        function showAlert(alertEl, message) {
+            alertEl.textContent = message;
+            alertEl.style.display = 'block';
+            setTimeout(() => {
+                alertEl.style.display = 'none';
+            }, 5000);
+        }
+
+        // Load profile data from API
+        async function loadProfileData() {
+            try {
+                const response = await fetch('/api/profile');
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('username').textContent = data.user.username;
+                    document.getElementById('email').textContent = data.user.email;
+                    document.getElementById('apikey').textContent = data.user.apikey || 'No API Key';
+                    document.getElementById('quota').textContent = data.user.quota ? `${data.user.quota} requests` : 'Unlimited';
+                    
+                    if (data.user.created_at) {
+                        const joinDate = new Date(data.user.created_at);
+                        document.getElementById('created_at').textContent = 
+                            joinDate.toLocaleDateString('en-US', { 
+                                year: 'numeric', 
+                                month: 'long', 
+                                day: 'numeric' 
+                            });
+                    } else {
+                        document.getElementById('created_at').textContent = 'Unknown';
+                    }
+                } else {
+                    window.location.href = '/auth/login';
+                }
+            } catch (error) {
+                console.error('Error loading profile:', error);
+                showAlert(errorAlert, 'Failed to load profile data');
+            }
+        }
+
+        // Copy API Key
+        copyBtn.addEventListener('click', () => {
+            const apiKey = document.getElementById('apikey').textContent;
+            if (apiKey && apiKey !== 'Loading...' && apiKey !== 'No API Key') {
+                navigator.clipboard.writeText(apiKey).then(() => {
+                    showAlert(successAlert, 'API Key copied to clipboard!');
+                });
+            }
+        });
+
+        // Edit API Key
+        editBtn.addEventListener('click', () => {
+            apiKeyModal.style.display = 'flex';
+            document.getElementById('newApiKey').value = 
+                document.getElementById('apikey').textContent;
+        });
+
+        // Close Modal
+        function closeModalFunc() {
+            apiKeyModal.style.display = 'none';
+        }
+
+        closeModal.addEventListener('click', closeModalFunc);
+        cancelBtn.addEventListener('click', closeModalFunc);
+
+        // Handle API Key Update
+        apiKeyForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const newApiKey = document.getElementById('newApiKey').value.trim();
+
+            if (!newApiKey) {
+                showAlert(errorAlert, 'API Key cannot be empty');
+                return;
+            }
+
+            try {
+                // Show loading spinner
+                saveBtn.innerHTML = '<span class="spinner"></span> Saving...';
+                saveBtn.disabled = true;
+
+                const response = await fetch('/api/profile/update-apikey', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ newApiKey })
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    document.getElementById('apikey').textContent = newApiKey;
+                    showAlert(successAlert, result.message || 'API Key updated successfully');
+                    closeModalFunc();
+                } else {
+                    showAlert(errorAlert, result.message || 'Failed to update API Key');
+                }
+            } catch (error) {
+                console.error('Error updating API Key:', error);
+                showAlert(errorAlert, 'An error occurred while updating the API Key');
+            } finally {
+                saveBtn.innerHTML = '<i class="fas fa-save"></i> Save Changes';
+                saveBtn.disabled = false;
+            }
+        });
+
+        logoutBtn.addEventListener('click', async () => {
+            try {
+                await fetch('/api/logout', { method: 'POST' });
+                window.location.href = '/auth/login';
+            } catch (error) {
+                console.error('Logout error:', error);
+                showAlert(errorAlert, 'Failed to logout. Please try again.');
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', loadProfileData);
+    </script>
+</body>
+</html>

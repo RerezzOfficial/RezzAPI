@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reset Password</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    body {
+      font-family: 'Poppins', Arial, sans-serif;
+      background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background: #ffffff;
+      padding: 2rem;
+      border-radius: 16px;
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 450px;
+      text-align: center;
+      position: relative;
+    }
+    h2 {
+      font-size: 1.5rem;
+      color: #333;
+      margin-bottom: 1.5rem;
+    }
+    p {
+      font-size: 0.9rem;
+      color: #666;
+      margin-bottom: 2rem;
+    }
+    .input-group {
+      position: relative;
+      width: 100%;
+      margin-bottom: 1rem;
+    }
+    input {
+      width: 85%;
+      padding: 1rem;
+      border: 2px solid #ddd;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+      outline: none;
+      padding-right: 3rem; /* Ruang untuk ikon */
+      margin-bottom: 10px;
+    }
+    input::placeholder {
+      color: #aaa;
+      font-size: 0.9rem;
+    }
+    input:focus {
+      border-color: #007bff;
+      box-shadow: 0 0 8px rgba(0, 123, 255, 0.2);
+    }
+    .input-icon {
+      position: absolute;
+      right: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1.2rem;
+      color: #aaa;
+      cursor: pointer;
+    }
+    button {
+      width: 100%;
+      padding: 1rem;
+      background: linear-gradient(135deg, #007bff, #0056b3);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    button:hover {
+      background: linear-gradient(135deg, #0056b3, #003d80);
+    }
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    .message {
+      margin-top: 1rem;
+      font-size: 0.9rem;
+      color: #e74c3c;
+      text-align: left;
+    }
+    .hidden {
+      display: none;
+    }
+    .back-icon {
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      font-size: 1.2rem;
+      color: #007bff;
+      cursor: pointer;
+      transition: color 0.3s ease;
+    }
+    .back-icon:hover {
+      color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <!-- Halaman 1: Input Email -->
+  <div id="emailPage" class="container">
+    <h2>Reset Password</h2>
+    <p>Masukkan email Anda untuk mengirim OTP.</p>
+    <form id="emailForm">
+      <input type="email" id="email" placeholder="Masukkan email Anda" required>
+      <br>
+      <button type="submit" id="sendOtpButton">Kirim OTP</button>
+    </form>
+    <div class="message" id="emailMessage"></div>
+  </div>
+
+  <!-- Halaman 2: Input OTP -->
+  <div id="otpPage" class="container hidden">
+    <i class="fas fa-arrow-left back-icon" id="backToEmail"></i>
+    <h2>Konfirmasi OTP</h2>
+    <p>Masukkan OTP yang telah dikirim ke email Anda.</p>
+    <form id="otpForm">
+      <input type="text" id="otp" placeholder="Masukkan OTP" required>
+      <br>
+      <button type="submit" id="verifyOtpButton">Verifikasi OTP</button>
+    </form>
+    <div class="message" id="otpMessage"></div>
+  </div>
+
+  <!-- Halaman 3: Input Password Baru -->
+  <div id="passwordPage" class="container hidden">
+    <i class="fas fa-arrow-left back-icon" id="backToOtp"></i>
+    <h2>Reset Password</h2>
+    <p>Buat password baru Anda.</p>
+    <form id="passwordForm">
+      <div class="input-group">
+        <input type="password" id="newPassword" placeholder="Masukkan password baru" required>
+        <i class="fas fa-eye input-icon" id="toggleNewPassword"></i>
+      </div>
+      <br>
+      <div class="input-group">
+        <input type="password" id="confirmPassword" placeholder="Konfirmasi password baru" required>
+        <i class="fas fa-eye input-icon" id="toggleConfirmPassword"></i>
+      </div>
+      <br>
+      <button type="submit">Simpan Password</button>
+    </form>
+    <div class="message" id="passwordMessage"></div>
+  </div>
+
+  <script>
+    const emailForm = document.getElementById('emailForm');
+    const otpForm = document.getElementById('otpForm');
+    const passwordForm = document.getElementById('passwordForm');
+    const emailPage = document.getElementById('emailPage');
+    const otpPage = document.getElementById('otpPage');
+    const passwordPage = document.getElementById('passwordPage');
+    const emailMessage = document.getElementById('emailMessage');
+    const otpMessage = document.getElementById('otpMessage');
+    const passwordMessage = document.getElementById('passwordMessage');
+
+    const sendOtpButton = document.getElementById('sendOtpButton');
+    const verifyOtpButton = document.getElementById('verifyOtpButton');
+
+    let userEmail = '';
+    let otpCooldown = false;
+
+    // Fungsi untuk menonaktifkan tombol selama cooldown
+    function disableButton(button, duration, messagePrefix) {
+      let timeLeft = duration;
+      button.disabled = true;
+      const originalText = button.textContent;
+      const interval = setInterval(() => {
+        button.textContent = `${messagePrefix} (${timeLeft}s)`;
+        timeLeft--;
+        if (timeLeft < 0) {
+          clearInterval(interval);
+          button.textContent = originalText;
+          button.disabled = false;
+        }
+      }, 1000);
+    }
+
+    // Toggle visibility password
+    function togglePasswordVisibility(inputId, iconId) {
+      const input = document.getElementById(inputId);
+      const icon = document.getElementById(iconId);
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+      } else {
+        input.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+      }
+    }
+
+    document.getElementById('toggleNewPassword').addEventListener('click', () => {
+      togglePasswordVisibility('newPassword', 'toggleNewPassword');
+    });
+    document.getElementById('toggleConfirmPassword').addEventListener('click', () => {
+      togglePasswordVisibility('confirmPassword', 'toggleConfirmPassword');
+    });
+
+    emailForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      emailMessage.textContent = '';
+      const email = document.getElementById('email').value.trim();
+
+      if (!email) {
+        emailMessage.textContent = 'Email harus diisi!';
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/reset-password/request', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          userEmail = email; 
+          emailMessage.textContent = data.message;
+          emailPage.classList.add('hidden');
+          otpPage.classList.remove('hidden');
+
+          disableButton(sendOtpButton, 60, 'Kirim OTP Lagi');
+        } else {
+          emailMessage.textContent = data.message || 'Gagal mengirim OTP.';
+        }
+      } catch (error) {
+        emailMessage.textContent = 'Terjadi kesalahan saat mengirim OTP.';
+      }
+    });
+
+    otpForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      otpMessage.textContent = '';
+
+      if (otpCooldown) {
+        otpMessage.textContent = 'Harap tunggu sebelum mencoba lagi.';
+        return;
+      }
+
+      const otp = document.getElementById('otp').value.trim();
+
+      if (!otp) {
+        otpMessage.textContent = 'OTP harus diisi!';
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/reset-password/verify-otp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: userEmail, otp })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          otpMessage.textContent = 'OTP berhasil diverifikasi!';
+          otpPage.classList.add('hidden');
+          passwordPage.classList.remove('hidden');
+        } else {
+          otpMessage.textContent = data.message || 'OTP salah atau kedaluwarsa.';
+          otpCooldown = true;
+
+          disableButton(verifyOtpButton, 10, 'Coba Lagi');
+          setTimeout(() => {
+            otpCooldown = false;
+          }, 10000);
+        }
+      } catch (error) {
+        otpMessage.textContent = 'Terjadi kesalahan saat memverifikasi OTP.';
+      }
+    });
+
+    passwordForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      passwordMessage.textContent = '';
+      const newPassword = document.getElementById('newPassword').value.trim();
+      const confirmPassword = document.getElementById('confirmPassword').value.trim();
+
+      if (!newPassword || !confirmPassword) {
+        passwordMessage.textContent = 'Semua kolom harus diisi!';
+        return;
+      }
+
+      if (newPassword.length < 6) {
+        passwordMessage.textContent = 'Password minimal 6 karakter!';
+        return;
+      }
+
+      if (newPassword !== confirmPassword) {
+        passwordMessage.textContent = 'Password tidak cocok!';
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/reset-password/reset', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: userEmail, newPassword })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          passwordMessage.textContent = 'Password berhasil direset!';
+          setTimeout(() => {
+            window.location.href = '/auth/login';
+          }, 2000);
+        } else {
+          passwordMessage.textContent = data.message || 'Gagal mereset password.';
+        }
+      } catch (error) {
+        passwordMessage.textContent = 'Terjadi kesalahan saat mereset password.';
+      }
+    });
+
+    document.getElementById('backToEmail').addEventListener('click', () => {
+      otpPage.classList.add('hidden');
+      emailPage.classList.remove('hidden');
+    });
+
+    document.getElementById('backToOtp').addEventListener('click', () => {
+      passwordPage.classList.add('hidden');
+      otpPage.classList.remove('hidden');
+    });
+  </script>
+</body>
+</html>
