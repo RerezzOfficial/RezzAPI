@@ -412,6 +412,7 @@ app.use('/api/islami', require('./api/islami'));
 app.use('/api/search', require('./api/search'));
 app.use('/api/anime', require('./api/anime'));
 
+module.exports = app;
 
 app.listen(PORT, () => {
   console.log(`Server jalan di http://localhost:${PORT}`);
